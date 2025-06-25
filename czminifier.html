@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Clean & Modern JS Minifier</title>
+    
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Fira+Code&display=swap" rel="stylesheet">
+
+    <link rel="stylesheet" href="./js/codemirror.css">
+    <link rel="stylesheet" href="./js/material.css">
+    
+    <style>
+ :root {
+            --bg-color: #f8f9fa;
+            --surface-color: #ffffff;
+            --text-primary: #212529;
+            --text-secondary: #6c757d;
+            --accent-primary: #0d6efd;
+            --accent-hover: #0b5ed7;
+            --border-color: #dee2e6;
+            --shadow-color: rgba(0, 0, 0, 0.05);
+            --font-sans: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+            --font-mono: 'Fira Code', monospace;
+        }
+
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+
+        body {
+            font-family: var(--font-sans);
+            background-color: var(--bg-color);
+            color: var(--text-primary);
+            line-height: 1.6;
+            padding: 2rem 1.5rem;
+        }
+
+        .container {
+            max-width: 1320px;
+            margin: 0 auto;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+            letter-spacing: -1px;
+        }
+
+        header p {
+            font-size: 1.125rem;
+            color: var(--text-secondary);
+            max-width: 600px;
+            margin: 0 auto;
+        }
+
+        main {
+            background-color: var(--surface-color);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            padding: 2rem;
+            box-shadow: 0 8px 32px var(--shadow-color);
+        }
+
+        .editor-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 2rem;
+            margin-bottom: 2rem;
+        }
+
+        .editor-header {
+            display: flex;
+            justify-content: flex-end; /* <-- Ini mendorong semua item ke kanan */
+            align-items: center;
+            margin-bottom: 1rem;
+            min-height: 36px;
+            gap: 1rem;
+        }
+
+        .editor-header label {
+            font-weight: 600;
+            font-size: 1rem;
+        }
+
+        .CodeMirror {
+            height: 450px;
+            border: 1px solid var(--border-color);
+            border-radius: 8px;
+            font-family: var(--font-mono);
+            font-size: 14px;
+        }
+        .cm-s-material.CodeMirror {
+            background-color: #263238;
+            color: #EEFFFF;
+        }
+        .cm-s-material .CodeMirror-gutters {
+            background: #263238;
+            border-right: 1px solid #37474F;
+        }
+        .cm-s-material .CodeMirror-cursor {
+            border-left: 1px solid #FFCC00;
+        }
+
+        .main-button {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            gap: 0.5rem;
+            width: 100%;
+            padding: 14px;
+            background-color: var(--accent-primary);
+            color: #ffffff;
+            border: none;
+            border-radius: 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.2s ease-in-out;
+            box-shadow: 0 4px 15px rgba(13, 110, 253, 0.2);
+        }
+
+        .main-button:hover {
+            background-color: var(--accent-hover);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
+        }
+
+        .copy-button { /* Kelas ini akan kita gunakan untuk kedua tombol ikon */
+            background: transparent;
+            border: 1px solid var(--border-color);
+            color: var(--text-secondary);
+            border-radius: 6px;
+            width: 36px;
+            height: 36px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s ease;
+        }
+        
+        .copy-button:hover {
+            border-color: var(--accent-primary);
+            color: var(--accent-primary);
+            background-color: rgba(13, 110, 253, 0.05);
+        }
+
+        .copy-button svg { width: 18px; height: 18px; }
+        
+        
+        /* === BLOK PERBAIKAN: Memaksa Word Wrap di CodeMirror === */
+        .CodeMirror-line {
+            /* Memastikan spasi tetap ada tapi teks bisa turun */
+            white-space: pre-wrap; 
+            
+            /* Memaksa pematahan kata jika kata tersebut terlalu panjang */
+            overflow-wrap: break-word; /* Standar modern */
+            word-wrap: break-word;     /* Fallback untuk browser lama */
+
+            /* Ini yang paling penting untuk kode minify: Izinkan pematahan di karakter mana pun */
+            word-break: break-all;     
+        }
+
+        .CodeMirror-wrap .CodeMirror-line {
+            /* Memastikan spasi tetap ada tapi teks bisa turun */
+            white-space: pre-wrap !important; 
+            
+            /* Memaksa pematahan kata jika kata tersebut terlalu panjang */
+            overflow-wrap: break-word !important;
+            word-wrap: break-word !important;
+
+            /* Ini yang paling penting: Izinkan pematahan di karakter mana pun */
+            word-break: break-all !important;     
+        }
+
+        .editor-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem; /* Memberi jarak antar tombol */
+        }
+        /* === Desain Responsif === */
+        @media (max-width: 992px) {
+            .editor-grid {
+                grid-template-columns: 1fr;
+                gap: 2.5rem;
+            }
+            body { padding: 1.5rem 1rem; }
+            h1 { font-size: 2rem; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <header>
+            <h1>JavaScript Minifier Pro</h1>
+            <p>Alat bantu modern untuk mengoptimalkan dan membersihkan kode JavaScript Anda secara instan dan aman.</p>
+        </header>
+        
+        <main>
+            <div class="editor-grid">
+                <div class="editor-container">
+                    <div class="editor-header">
+                        <label for="inputScript">Kode Sumber</label>
+                    </div>
+                    <textarea id="inputScript"></textarea>
+                </div>
+                <div class="editor-container">
+                    <div class="editor-header">
+                        <label for="minifiedOutput">Hasil Optimasi</label>
+                        <button id="copyBtn" class="copy-button" title="Salin ke Clipboard">
+                            <svg id="copyBtnIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                        </button>
+                        <button id="saveBtn" class="copy-button" title="Simpan sebagai file">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                        </button>
+                    </div>
+                    <textarea id="minifiedOutput"></textarea>
+                </div>
+            </div>
+            
+            <button id="processBtn" class="main-button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12a9 9 0 1 1-6.219-8.56"/></svg>
+                <span>Optimize & Minify</span>
+            </button>
+        </main>
+    </div>
+
+    <script src="./js/codemirror.js"></script>
+    <script src="./js/javascript.js"></script>
+    <script src="./js/terser.js"></script>
+
+    <script>
+        // INISIALISASI EDITOR
+        const editor = CodeMirror.fromTextArea(document.getElementById('inputScript'), {
+            lineNumbers: true, mode: 'javascript', theme: 'material', lineWrapping: true,
+        });
+        const outputEditor = CodeMirror.fromTextArea(document.getElementById('minifiedOutput'), {
+            mode: 'javascript', theme: 'material', readOnly: true, lineWrapping: true,
+        });
+        
+        // REFERENSI ELEMEN TOMBOL
+        const processButton = document.getElementById('processBtn');
+        const copyButton = document.getElementById('copyBtn');
+        const saveButton = document.getElementById('saveBtn'); // Tombol baru
+        const copyButtonIcon = document.getElementById('copyBtnIcon');
+        
+        const originalCopyIconHTML = copyButtonIcon.innerHTML;
+        const successIconHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+        // LOGIKA MINIFY
+        async function processWithTerser() {
+            const originalCode = editor.getValue();
+            outputEditor.setValue("Mengoptimalkan kode...");
+            try {
+                const options = { mangle: { toplevel: true }, compress: true };
+                setTimeout(async () => {
+                    const result = await Terser.minify(originalCode, options);
+                    if (result.error) throw result.error;
+                    outputEditor.setValue(result.code);
+                }, 100);
+            } catch (error) {
+                outputEditor.setValue('Error:\n' + error.message);
+            }
+        }
+
+        // LOGIKA COPY
+        function copyToClipboard() {
+            const textToCopy = outputEditor.getValue();
+            if (!textToCopy || textToCopy.startsWith("Mengoptimalkan") || textToCopy.startsWith("Error")) return;
+            navigator.clipboard.writeText(textToCopy).then(() => {
+                copyButtonIcon.innerHTML = successIconHTML;
+                setTimeout(() => {
+                    copyButtonIcon.innerHTML = originalCopyIconHTML;
+                }, 2000);
+            }).catch(err => {
+                console.error('Gagal menyalin teks: ', err);
+            });
+        }
+        
+        // --- LOGIKA SIMPAN FILE BARU ---
+        function saveToFile() {
+            const content = outputEditor.getValue();
+            // Jangan simpan jika output kosong atau masih berupa status
+            if (!content || content.startsWith("Mengoptimalkan") || content.startsWith("Error")) {
+                alert("Tidak ada kode valid untuk disimpan.");
+                return;
+            }
+
+            // 1. Buat 'Blob' dari konten teks
+            const blob = new Blob([content], { type: 'text/javascript' });
+
+            // 2. Buat elemen link <a> sementara
+            const a = document.createElement('a');
+            a.href = URL.createObjectURL(blob);
+            a.download = 'script.min.js'; // Nama file default
+
+            // 3. Simulasikan klik pada link untuk memicu unduhan
+            document.body.appendChild(a);
+            a.click();
+
+            // 4. Bersihkan elemen link dari dokumen
+            document.body.removeChild(a);
+            // Bersihkan URL objek untuk membebaskan memori
+            URL.revokeObjectURL(a.href);
+        }
+        
+        // EVENT LISTENERS
+        processButton.addEventListener('click', processWithTerser);
+        copyButton.addEventListener('click', copyToClipboard);
+        saveButton.addEventListener('click', saveToFile); // Event listener baru
+        
+    </script>
+</body>
+</html>
