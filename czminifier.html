@@ -13,7 +13,7 @@
     <link rel="stylesheet" href="./js/material.css">
     
     <style>
- :root {
+        :root {
             --bg-color: #f8f9fa;
             --surface-color: #ffffff;
             --text-primary: #212529;
@@ -77,11 +77,10 @@
 
         .editor-header {
             display: flex;
-            justify-content: flex-end; /* <-- Ini mendorong semua item ke kanan */
+            justify-content: space-between; /* Diubah untuk menempatkan item di ujung berlawanan */
             align-items: center;
             margin-bottom: 1rem;
             min-height: 36px;
-            gap: 1rem;
         }
 
         .editor-header label {
@@ -132,7 +131,7 @@
             box-shadow: 0 6px 20px rgba(13, 110, 253, 0.3);
         }
 
-        .copy-button { /* Kelas ini akan kita gunakan untuk kedua tombol ikon */
+        .copy-button { /* Kelas ini digunakan untuk semua tombol ikon */
             background: transparent;
             border: 1px solid var(--border-color);
             color: var(--text-secondary);
@@ -154,37 +153,21 @@
 
         .copy-button svg { width: 18px; height: 18px; }
         
-        
-        /* === BLOK PERBAIKAN: Memaksa Word Wrap di CodeMirror === */
-        .CodeMirror-line {
-            /* Memastikan spasi tetap ada tapi teks bisa turun */
-            white-space: pre-wrap; 
-            
-            /* Memaksa pematahan kata jika kata tersebut terlalu panjang */
-            overflow-wrap: break-word; /* Standar modern */
-            word-wrap: break-word;     /* Fallback untuk browser lama */
-
-            /* Ini yang paling penting untuk kode minify: Izinkan pematahan di karakter mana pun */
-            word-break: break-all;     
-        }
-
-        .CodeMirror-wrap .CodeMirror-line {
-            /* Memastikan spasi tetap ada tapi teks bisa turun */
-            white-space: pre-wrap !important; 
-            
-            /* Memaksa pematahan kata jika kata tersebut terlalu panjang */
+        /* === BLOK PERBAIKAN: Word Wrap di CodeMirror === */
+        .CodeMirror-line, .CodeMirror-wrap .CodeMirror-line {
+            white-space: pre-wrap !important;  
             overflow-wrap: break-word !important;
             word-wrap: break-word !important;
-
-            /* Ini yang paling penting: Izinkan pematahan di karakter mana pun */
-            word-break: break-all !important;     
+            word-break: break-all !important;   
         }
 
+        /* === BARU: Grup untuk tombol hasil optimasi === */
         .editor-actions {
             display: flex;
             align-items: center;
-            gap: 0.5rem; /* Memberi jarak antar tombol */
+            gap: 0.5rem;
         }
+        
         /* === Desain Responsif === */
         @media (max-width: 992px) {
             .editor-grid {
@@ -207,6 +190,12 @@
             <div class="editor-grid">
                 <div class="editor-container">
                     <div class="editor-header">
+                        <div class="editor-actions">
+                             <input type="file" id="fileInput" accept=".js" style="display: none;">
+                             <button id="openFileBtn" class="copy-button" title="Buka File JavaScript">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 20h16a2 2 0 0 0 2-2V8a2 2 0 0 0-2-2h-7.93a2 2 0 0 1-1.66-.9l-.82-1.2A2 2 0 0 0 7.93 3H4a2 2 0 0 0-2 2v13c0 1.1.9 2 2 2z"></path></svg>
+                             </button>
+                        </div>
                         <label for="inputScript">Kode Sumber</label>
                     </div>
                     <textarea id="inputScript"></textarea>
@@ -214,12 +203,14 @@
                 <div class="editor-container">
                     <div class="editor-header">
                         <label for="minifiedOutput">Hasil Optimasi</label>
-                        <button id="copyBtn" class="copy-button" title="Salin ke Clipboard">
-                            <svg id="copyBtnIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
-                        </button>
-                        <button id="saveBtn" class="copy-button" title="Simpan sebagai file">
-                            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
-                        </button>
+                        <div class="editor-actions">
+                             <button id="copyBtn" class="copy-button" title="Salin ke Clipboard">
+                                 <svg id="copyBtnIcon" xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2" ry="2"></rect><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"></path></svg>
+                             </button>
+                             <button id="saveBtn" class="copy-button" title="Simpan sebagai file">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line></svg>
+                             </button>
+                        </div>
                     </div>
                     <textarea id="minifiedOutput"></textarea>
                 </div>
@@ -237,85 +228,114 @@
     <script src="./js/terser.js"></script>
 
     <script>
-        // INISIALISASI EDITOR
-        const editor = CodeMirror.fromTextArea(document.getElementById('inputScript'), {
-            lineNumbers: true, mode: 'javascript', theme: 'material', lineWrapping: true,
+    // INISIALISASI EDITOR
+    const editor = CodeMirror.fromTextArea(document.getElementById('inputScript'), {
+        lineNumbers: true, mode: 'javascript', theme: 'material', lineWrapping: true,
+    });
+    const outputEditor = CodeMirror.fromTextArea(document.getElementById('minifiedOutput'), {
+        mode: 'javascript', theme: 'material', readOnly: true, lineWrapping: true,
+    });
+    
+    // REFERENSI ELEMEN
+    const processButton = document.getElementById('processBtn');
+    const copyButton = document.getElementById('copyBtn');
+    const saveButton = document.getElementById('saveBtn');
+    const copyButtonIcon = document.getElementById('copyBtnIcon');
+    const openFileButton = document.getElementById('openFileBtn');
+    const fileInput = document.getElementById('fileInput');
+
+    let currentFileName = 'script.js';
+    
+    const originalCopyIconHTML = copyButtonIcon.innerHTML;
+    const successIconHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
+
+    async function processWithTerser() {
+        const originalCode = editor.getValue();
+        if (!originalCode.trim()) {
+            outputEditor.setValue('Error: Kode sumber kosong.');
+            return;
+        }
+
+        // Menggunakan Regex yang sudah terbukti berfungsi
+        const headerRegex = /\/\*[\s\S]*?\*\//; 
+
+        const matchedHeader = originalCode.match(headerRegex);
+        const headerComment = matchedHeader ? matchedHeader[0] : '';
+        
+        outputEditor.setValue("Mengoptimalkan kode...");
+
+        try {
+            const options = { mangle: { toplevel: true }, compress: true };
+            
+            setTimeout(async () => {
+                const result = await Terser.minify(originalCode, options);
+                if (result.error) throw result.error;
+
+                const finalCode = headerComment 
+                    ? `${headerComment}\n\n${result.code}` 
+                    : result.code;
+
+                outputEditor.setValue(finalCode);
+
+            }, 100);
+        } catch (error) {
+            outputEditor.setValue('Error:\n' + error.message);
+        }
+    }
+
+    function copyToClipboard() {
+        const textToCopy = outputEditor.getValue();
+        if (!textToCopy || textToCopy.startsWith("Mengoptimalkan") || textToCopy.startsWith("Error")) return;
+        navigator.clipboard.writeText(textToCopy).then(() => {
+            copyButtonIcon.innerHTML = successIconHTML;
+            setTimeout(() => {
+                copyButtonIcon.innerHTML = originalCopyIconHTML;
+            }, 2000);
+        }).catch(err => {
+            console.error('Gagal menyalin teks: ', err);
         });
-        const outputEditor = CodeMirror.fromTextArea(document.getElementById('minifiedOutput'), {
-            mode: 'javascript', theme: 'material', readOnly: true, lineWrapping: true,
-        });
-        
-        // REFERENSI ELEMEN TOMBOL
-        const processButton = document.getElementById('processBtn');
-        const copyButton = document.getElementById('copyBtn');
-        const saveButton = document.getElementById('saveBtn'); // Tombol baru
-        const copyButtonIcon = document.getElementById('copyBtnIcon');
-        
-        const originalCopyIconHTML = copyButtonIcon.innerHTML;
-        const successIconHTML = `<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"></polyline></svg>`;
-
-        // LOGIKA MINIFY
-        async function processWithTerser() {
-            const originalCode = editor.getValue();
-            outputEditor.setValue("Mengoptimalkan kode...");
-            try {
-                const options = { mangle: { toplevel: true }, compress: true };
-                setTimeout(async () => {
-                    const result = await Terser.minify(originalCode, options);
-                    if (result.error) throw result.error;
-                    outputEditor.setValue(result.code);
-                }, 100);
-            } catch (error) {
-                outputEditor.setValue('Error:\n' + error.message);
-            }
-        }
-
-        // LOGIKA COPY
-        function copyToClipboard() {
-            const textToCopy = outputEditor.getValue();
-            if (!textToCopy || textToCopy.startsWith("Mengoptimalkan") || textToCopy.startsWith("Error")) return;
-            navigator.clipboard.writeText(textToCopy).then(() => {
-                copyButtonIcon.innerHTML = successIconHTML;
-                setTimeout(() => {
-                    copyButtonIcon.innerHTML = originalCopyIconHTML;
-                }, 2000);
-            }).catch(err => {
-                console.error('Gagal menyalin teks: ', err);
-            });
+    }
+    
+    function saveToFile() {
+        const content = outputEditor.getValue();
+        if (!content || content.startsWith("Mengoptimalkan") || content.startsWith("Error")) {
+            alert("Tidak ada kode valid untuk disimpan.");
+            return;
         }
         
-        // --- LOGIKA SIMPAN FILE BARU ---
-        function saveToFile() {
-            const content = outputEditor.getValue();
-            // Jangan simpan jika output kosong atau masih berupa status
-            if (!content || content.startsWith("Mengoptimalkan") || content.startsWith("Error")) {
-                alert("Tidak ada kode valid untuk disimpan.");
-                return;
-            }
+        const baseName = currentFileName.endsWith('.js') ? currentFileName.slice(0, -3) : currentFileName;
+        const newFileName = `${baseName}.min.js`;
 
-            // 1. Buat 'Blob' dari konten teks
-            const blob = new Blob([content], { type: 'text/javascript' });
+        const blob = new Blob([content], { type: 'text/javascript' });
+        const a = document.createElement('a');
+        a.href = URL.createObjectURL(blob);
+        a.download = newFileName;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(a.href);
+    }
 
-            // 2. Buat elemen link <a> sementara
-            const a = document.createElement('a');
-            a.href = URL.createObjectURL(blob);
-            a.download = 'script.min.js'; // Nama file default
-
-            // 3. Simulasikan klik pada link untuk memicu unduhan
-            document.body.appendChild(a);
-            a.click();
-
-            // 4. Bersihkan elemen link dari dokumen
-            document.body.removeChild(a);
-            // Bersihkan URL objek untuk membebaskan memori
-            URL.revokeObjectURL(a.href);
-        }
-        
-        // EVENT LISTENERS
-        processButton.addEventListener('click', processWithTerser);
-        copyButton.addEventListener('click', copyToClipboard);
-        saveButton.addEventListener('click', saveToFile); // Event listener baru
-        
-    </script>
+    function handleFileLoad(event) {
+        const file = event.target.files[0];
+        if (!file) return;
+        currentFileName = file.name;
+        const reader = new FileReader();
+        reader.onload = (e) => {
+            const content = e.target.result;
+            editor.setValue(content);
+            outputEditor.setValue(''); 
+        };
+        reader.readAsText(file);
+    }
+    
+    // EVENT LISTENERS
+    processButton.addEventListener('click', processWithTerser);
+    copyButton.addEventListener('click', copyToClipboard);
+    saveButton.addEventListener('click', saveToFile);
+    openFileButton.addEventListener('click', () => fileInput.click());
+    fileInput.addEventListener('change', handleFileLoad);
+    
+</script>
 </body>
 </html>
